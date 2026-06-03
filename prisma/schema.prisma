@@ -1,0 +1,58 @@
+// Prisma schema for gacay-tetris
+// Prisma 7: new `prisma-client` generator (requires `output`), driver adapters are GA.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+  runtime  = "nodejs"
+}
+
+// Prisma 7: connection URLs live in prisma.config.ts (CLI/migrations) and in the
+// runtime adapter (src/lib/db/prisma.ts). The schema datasource only declares the provider.
+datasource db {
+  provider = "postgresql"
+}
+
+enum GameMode {
+  SINGLE
+  MULTI
+}
+
+enum LobbyStatus {
+  WAITING
+  PLAYING
+  FINISHED
+}
+
+/// One row per finished game. Powers the per-mode top-10 leaderboards.
+model Score {
+  id        String   @id @default(cuid())
+  username  String
+  points    Int
+  mode      GameMode
+  lines     Int      @default(0)
+  level     Int      @default(1)
+  createdAt DateTime @default(now())
+
+  @@index([mode, points(sort: Desc)])
+}
+
+/// A public 1v1 lobby. Score-synced, server-authoritative timing.
+model Lobby {
+  id            String      @id @default(cuid())
+  code          String      @unique @default(cuid())
+  status        LobbyStatus @default(WAITING)
+  durationSec   Int // validated server-side to {60, 180, 300}
+  hostUsername  String
+  guestUsername String? // null until someone joins (capacity guard)
+  hostScore     Int         @default(0)
+  guestScore    Int         @default(0)
+  hostFinished  Boolean     @default(false)
+  guestFinished Boolean     @default(false)
+  startedAt     DateTime? // set on 2nd join = now + COUNTDOWN_MS; authority for start AND end
+  winner        String? // username or "DRAW"
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([status, createdAt])
+}
