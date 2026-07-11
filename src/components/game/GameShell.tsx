@@ -1,11 +1,12 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { CanvasBoard } from "@/lib/game-react/render/CanvasBoard";
 import { PiecePreview } from "@/lib/game-react/render/PiecePreview";
 import { useGameInput } from "@/lib/game-react/useGameInput";
 import type { TetrisController } from "@/lib/game-react/useTetris";
+import { TouchControls } from "./TouchControls";
 import { Button, cn } from "@/components/ui";
 
 function Panel({
@@ -56,6 +57,18 @@ export function GameShell({
   useGameInput(controller, inputEnabled);
   const { hud, banner } = controller;
 
+  // Show on-screen controls on touch devices / small screens.
+  const [isTouch, setIsTouch] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(pointer: coarse), (max-width: 639px)");
+    // Sync to the media query on mount (client-only, avoids a hydration mismatch).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsTouch(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setIsTouch(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
   return (
     <div className="flex w-full flex-col items-center gap-3">
       {topSlot}
@@ -71,8 +84,9 @@ export function GameShell({
           <Stat label="Lines" value={hud.lines} />
         </div>
 
-        {/* Board */}
-        <div className="relative aspect-[10/20] h-[min(64vh,560px)] max-w-full shrink-0">
+        {/* Board — height is also capped by available width (width = height / 2)
+            so the two side columns never push it off a narrow screen. */}
+        <div className="relative aspect-[10/20] h-[min(52vh,calc((100vw_-_168px)*2),560px)] max-w-full shrink-0 touch-none sm:h-[min(64vh,560px)]">
           <CanvasBoard controller={controller} />
 
           <AnimatePresence>
@@ -113,7 +127,11 @@ export function GameShell({
           <Panel label="Next" className="flex-1">
             <div className="flex flex-col gap-1.5">
               {hud.next.slice(0, 5).map((t, i) => (
-                <PiecePreview key={i} type={t} />
+                <PiecePreview
+                  key={i}
+                  type={t}
+                  className={i >= 3 ? "hidden sm:block" : undefined}
+                />
               ))}
             </div>
           </Panel>
@@ -121,6 +139,12 @@ export function GameShell({
       </div>
 
       {bottomSlot}
+
+      {isTouch && (
+        <div className="mt-1 w-full px-1">
+          <TouchControls controller={controller} enabled={inputEnabled} />
+        </div>
+      )}
 
       <p className="mt-1 hidden max-w-xl text-center text-xs text-muted sm:block">
         ← → move · ↓ soft drop · Space hard drop · ↑ / X rotate · Z rotate ccw ·

@@ -73,8 +73,6 @@ export function CanvasBoard({ controller }: { controller: TetrisController }) {
 
     const flashes: Flash[] = [];
     const particles: Particle[] = [];
-    let shakeStart = -9999;
-    let shakeMag = 0;
     let raf = 0;
 
     const draw = (now: number) => {
@@ -103,22 +101,13 @@ export function CanvasBoard({ controller }: { controller: TetrisController }) {
               });
             }
           }
-        } else if (e.type === "harddrop") {
-          shakeStart = now;
-          shakeMag = Math.min(7, 1.5 + e.cells * 0.35);
         }
       }
 
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, logicalW, logicalH);
 
-      let oy = 0;
-      const shakeT = now - shakeStart;
-      if (shakeT < 130) {
-        oy = Math.sin(shakeT / 11) * shakeMag * (1 - shakeT / 130);
-      }
       ctx.save();
-      ctx.translate(0, oy);
 
       // Board background.
       roundRect(ctx, 0, 0, logicalW, logicalH, cell * 0.25);

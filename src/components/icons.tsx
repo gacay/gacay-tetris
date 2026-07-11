@@ -127,3 +127,41 @@ export const HomeIcon = (p: IconProps) => (
     <path d="M3 9.5 12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V9.5z" />
   </svg>
 );
+
+export const ChevronLeftIcon = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <path d="m15 18-6-6 6-6" />
+  </svg>
+);
+
+export const ChevronRightIcon = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <path d="m9 18 6-6-6-6" />
+  </svg>
+);
+
+export const ChevronDownIcon = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <path d="m6 9 6 6 6-6" />
+  </svg>
+);
+
+export const ChevronsDownIcon = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <path d="m7 6 5 5 5-5M7 13l5 5 5-5" />
+  </svg>
+);
+
+export const RotateCwIcon = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <path d="M21 12a9 9 0 1 1-3-6.7L21 8" />
+    <path d="M21 3v5h-5" />
+  </svg>
+);
+
+export const LayersIcon = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <path d="m12 2 9 5-9 5-9-5 9-5z" />
+    <path d="m3 12 9 5 9-5M3 17l9 5 9-5" />
+  </svg>
+);
